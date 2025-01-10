@@ -2,6 +2,7 @@ import { useState } from "react";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl";
 import * as mobilenet from "@tensorflow-models/mobilenet";
+import { HfInference } from "@huggingface/inference";
 
 import {
   Container,
@@ -34,14 +35,38 @@ function App() {
 
   const classifyImage = async () => {
     setLoading(true);
-    await tf.setBackend("webgl");
-    await tf.ready();
+
+    if (setImage) {
+      await tf.setBackend("webgl");
+      await tf.ready();
+      console.log("WebGL backend initialized!");
+    }
+
     const model = await mobilenet.load();
     const imgElement = document.getElementById("uploadedImage");
     const results = await model.classify(imgElement);
     setPredictions(results);
     setLoading(false);
   };
+
+
+  const hf = new HfInference({ apiKey: import.meta.env.VITE_HF });
+
+  const generateDescription = async (predictions) => {
+    const input = `Image contains: ${predictions.join(
+      ", "
+    )}. Write a simple description.`;
+
+    const response = await hf.textGeneration({
+      model: "gpt2",
+      inputs: input,
+      parameters: { max_new_tokens: 50 },
+    });
+
+    return response.generated_text;
+  };
+
+  console.log("Gen by GPT", generateDescription);
 
   return (
     <Container maxWidth="sm" style={{ marginTop: "20px" }}>
