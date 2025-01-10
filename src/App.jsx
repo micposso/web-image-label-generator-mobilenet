@@ -46,6 +46,10 @@ function App() {
     const imgElement = document.getElementById("uploadedImage");
     const results = await model.classify(imgElement);
     setPredictions(results);
+
+    const description = await generateDescription(results.map(r => r.className));
+    console.log("Generated Description:", description);
+
     setLoading(false);
   };
 
@@ -65,8 +69,6 @@ function App() {
 
     return response.generated_text;
   };
-
-  console.log("Gen by GPT", generateDescription);
 
   return (
     <Container maxWidth="sm" style={{ marginTop: "20px" }}>
