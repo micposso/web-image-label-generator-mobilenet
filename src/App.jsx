@@ -32,6 +32,8 @@ function App() {
     }
   };
 
+
+
   const classifyImage = async () => {
     setLoading(true);
     await tf.setBackend("webgl");
@@ -39,9 +41,14 @@ function App() {
     const model = await mobilenet.load();
     const imgElement = document.getElementById("uploadedImage");
     const results = await model.classify(imgElement);
-    setPredictions(results);
+    console.log("results", results[0]);
+    const cleanResults = {
+      className: results[0].className.split(",")[0]
+    };
+    setPredictions(cleanResults);
     setLoading(false);
   };
+
 
   return (
     <Container maxWidth="sm" style={{ marginTop: "20px" }}>
@@ -84,23 +91,19 @@ function App() {
           </Button>
         </Box>
       )}
-      {predictions.length > 0 && (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Predictions:
-            </Typography>
+
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Predictions:
+          </Typography>
+          {predictions.className && (
             <ul>
-              {predictions.map((prediction, index) => (
-                <li key={index}>
-                  {prediction.className} -{" "}
-                  {Math.round(prediction.probability * 100)}%
-                </li>
-              ))}
+              <li>{predictions.className}</li>
             </ul>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </Container>
   );
 }
